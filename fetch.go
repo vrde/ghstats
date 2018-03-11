@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/vrde/gitstats/utils"
 	"net/http"
 	"os"
 	"time"
@@ -47,9 +48,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	spew.Dump(result)
-	link := resp.Header.Get("Link")
-	fmt.Printf("%s", link)
+	spew.Dump(utils.ParseLinkHeader(resp.Header.Get("Link")))
 
 	// fmt.Printf("%+v\n", result)
 }
