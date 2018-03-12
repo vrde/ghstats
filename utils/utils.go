@@ -4,8 +4,15 @@ import (
 	"strings"
 )
 
-func ParseLinkHeader(linkHeader string) map[string]string {
-	links := make(map[string]string)
+type LinkHeader struct {
+    Url string
+    Rel string
+}
+
+type LinkHeaders []LinkHeader
+
+func ParseLinkHeader(linkHeader string) LinkHeaders {
+	var links LinkHeaders
 
 	for _, line := range strings.Split(linkHeader, ",") {
 		line := strings.TrimSpace(line)
@@ -22,7 +29,8 @@ func ParseLinkHeader(linkHeader string) map[string]string {
 		}
 		rel := strings.Trim(relTokens[1], `"`)
 
-		links[rel] = link
+                linkHeader := LinkHeader{link, rel}
+                links = append(links, linkHeader)
 	}
 
 	return links
