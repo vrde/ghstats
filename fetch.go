@@ -26,29 +26,35 @@ type PullRequest struct {
 	Url string
 }
 
+type LinkHeader struct {
+    Url string
+    Rel string
+}
 
-func getIssues(url string) (Issues, utils.LinkHeaders, error){
+type LinkHeaders []LinkHeader
+
+func getIssues(url string) (Issues, error){
 	resp, err := http.Get(url)
 
 	if err != nil {
-            return nil, nil, err
+            return nil, err
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-            return nil, nil, err
+            return nil, err
 	}
 
         content, err := ioutil.ReadAll(resp.Body)
         if err != nil {
-            return nil, nil, err
+            return nil, err
         }
 
 	var issues Issues
         err = json.Unmarshal(content, &issues)
         if err != nil {
-            return nil, nil, err
+            return nil, err
 	}
         linkHeader := utils.ParseLinkHeader(resp.Header.Get("Link"))
 
