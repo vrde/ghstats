@@ -48,7 +48,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	spew.Dump(utils.ParseLinkHeader(resp.Header.Get("Link")))
+	spew.Dump(utils.NextLinkHeader(resp.Header.Get("Link")))
 
 	// fmt.Printf("%+v\n", result)
 }

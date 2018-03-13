@@ -1,44 +1,41 @@
 package utils
 
 import (
+	"fmt"
 	"testing"
 )
 
-func compare(t *testing.T, returned map[string]string, expected map[string]string) {
-	for expectedKey, expectedValue := range expected {
-		if returned[expectedKey] != expectedValue {
-			t.Error(expectedKey, expectedValue, returned[expectedKey])
+func TestParseLinkHeader(t *testing.T) {
+	tests := []struct {
+		header string
+		next   string
+		err    bool
+	}{
+		{
+			`<https://api.github.com/resource?page=2>; rel="next",\n<https://api.github.com/resource?page=5>; rel="last"`,
+			"https://api.github.com/resource?page=2",
+			false,
+		},
+		{
+			`<https://api.github.com/resource?page=2>; rel="next",\n<https://api.github.com/resource?page=5> rel="last"`,
+			"https://api.github.com/resource?page=2",
+			false,
+		},
+		{
+			`<https://api.github.com/resource?page=5> rel="last"`,
+			"",
+			true,
+		},
+	}
+
+	for _, test := range tests {
+		next, err := NextLinkHeader(test.header)
+		call := fmt.Sprintf("NextLinkHeader(%q)", test.header)
+
+		if test.err && err == nil || !test.err && err != nil {
+			t.Errorf("%s\nGot error: %v\nExpecting error: %t", call, err, test.err)
+		} else if next != test.next {
+			t.Errorf("NextLinkHeader(%q)\nGot:  %v\nWant: %v", test.header, next, test.next)
 		}
 	}
-}
-
-func TestParseLinkHeaderParsesGoodHeaders(t *testing.T) {
-	links := ParseLinkHeader(
-		`<https://api.github.com/resource?page=2>; rel="next",
-         <https://api.github.com/resource?page=5>; rel="last"`)
-
-	expected := map[string]string{
-		"next": "https://api.github.com/resource?page=2",
-		"last": "https://api.github.com/resource?page=5",
-	}
-
-	compare(t, links, expected)
-}
-
-func TestParseLinkHeaderReturnsAnEmptyMapOnEmptyStrig(t *testing.T) {
-	links := ParseLinkHeader("")
-	expected := map[string]string{}
-	compare(t, links, expected)
-}
-
-func TestLinkHeaderParsesInvalidHeaders(t *testing.T) {
-	links := ParseLinkHeader(
-		`<https://api.github.com/resource?page=2>; rel="next",
-         <https://api.github.com/resource?page=5> "last"`)
-
-	expected := map[string]string{
-		"next": "https://api.github.com/resource?page=2",
-	}
-
-	compare(t, links, expected)
 }

@@ -1,12 +1,11 @@
 package utils
 
 import (
+	"errors"
 	"strings"
 )
 
-func ParseLinkHeader(linkHeader string) map[string]string {
-	links := make(map[string]string)
-
+func NextLinkHeader(linkHeader string) (string, error) {
 	for _, line := range strings.Split(linkHeader, ",") {
 		line := strings.TrimSpace(line)
 
@@ -22,8 +21,10 @@ func ParseLinkHeader(linkHeader string) map[string]string {
 		}
 		rel := strings.Trim(relTokens[1], `"`)
 
-		links[rel] = link
+		if rel == "next" {
+			return link, nil
+		}
 	}
 
-	return links
+	return "", errors.New(`cannot find "next" link in header`)
 }
