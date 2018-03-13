@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func NextLinkHeader(linkHeader string) (string, error) {
+func NextLinkHeader(linkHeader string) (error, string) {
 	for _, line := range strings.Split(linkHeader, ",") {
 		line := strings.TrimSpace(line)
 
@@ -22,9 +22,9 @@ func NextLinkHeader(linkHeader string) (string, error) {
 		rel := strings.Trim(relTokens[1], `"`)
 
 		if rel == "next" {
-			return link, nil
+			return nil, link
 		}
 	}
 
-	return "", errors.New(`cannot find "next" link in header`)
+	return errors.New(`cannot find "next" link in header`), ""
 }

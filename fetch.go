@@ -10,24 +10,24 @@ import (
 	"time"
 )
 
-const IssueUrl = "https://api.github.com/repos/bigchaindb/bigchaindb/issues?state=closed"
+const IssueUrl = "https://api.github.com/repos/%s/issues?state=closed"
 
-type Issues []*Issue
+type Issues []Issue
 
 type Issue struct {
 	Number      int
-	PullRequest *PullRequest `json:"pull_request,omitempty"`
-	CreatedAt   time.Time    `json:"created_at"`
-	UpdatedAt   time.Time    `json:"updated_at"`
-	ClosedAt    time.Time    `json:"closed_at"`
+	PullRequest PullRequest `json:"pull_request,omitempty"`
+	CreatedAt   time.Time   `json:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at"`
+	ClosedAt    time.Time   `json:"closed_at"`
 }
 
 type PullRequest struct {
 	Url string
 }
 
-func main() {
-	resp, err := http.Get(IssueUrl)
+func fetchIssues(url string, issues *Issues) (error, string) {
+	resp, err := http.Get(url)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
@@ -37,18 +37,36 @@ func main() {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Fprintf(os.Stderr, "GET failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "GET failed with status: %d (%v)\n", resp.StatusCode, err)
 		os.Exit(1)
 	}
 
-	var result Issues
-
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", IssueUrl, err)
+	if err := json.NewDecoder(resp.Body).Decode(issues); err != nil {
+		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
 		os.Exit(1)
 	}
 
-	spew.Dump(utils.NextLinkHeader(resp.Header.Get("Link")))
+	return utils.NextLinkHeader(resp.Header.Get("Link"))
+}
 
-	// fmt.Printf("%+v\n", result)
+func FetchIssues(repository string) *Issues {
+	var issues Issues
+	url := fmt.Sprintf(IssueUrl, repository)
+
+	for {
+		var (
+			last Issues
+			err  error
+		)
+		err, url = fetchIssues(url, &last)
+		if err != nil {
+			return &issues
+		}
+		issues = append(issues, last...)
+	}
+}
+
+func main() {
+	issues := FetchIssues(os.Args[1])
+	spew.Dump(issues)
 }

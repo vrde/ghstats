@@ -29,7 +29,7 @@ func TestParseLinkHeader(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		next, err := NextLinkHeader(test.header)
+		err, next := NextLinkHeader(test.header)
 		call := fmt.Sprintf("NextLinkHeader(%q)", test.header)
 
 		if test.err && err == nil || !test.err && err != nil {
