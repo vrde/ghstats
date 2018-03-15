@@ -55,25 +55,28 @@ func fetchIssues(url string, issues *Issues) (error, string) {
 	return utils.NextLinkHeader(resp.Header.Get("Link"))
 }
 
-func FetchIssues(repository string) *Issues {
-	var issues Issues
+func FetchIssues(repository string, ch chan<- Issues) {
 	url := fmt.Sprintf(IssueUrl, repository)
 
 	for {
 		var (
-			last Issues
-			err  error
+			issues Issues
+			err    error
 		)
 		Logger.Println("Fetching", url)
-		err, url = fetchIssues(url, &last)
+		err, url = fetchIssues(url, &issues)
 		if err != nil {
-			return &issues
+			close(ch)
+			return
 		}
-		issues = append(issues, last...)
+		ch <- issues
 	}
 }
 
 func main() {
-	issues := FetchIssues(os.Args[1])
-	spew.Dump(issues)
+	ch := make(chan Issues)
+	go FetchIssues(os.Args[1], ch)
+	for issues := range ch {
+		spew.Dump(issues)
+	}
 }
