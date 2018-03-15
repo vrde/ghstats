@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/vrde/gitstats/utils"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
 )
 
 const IssueUrl = "https://api.github.com/repos/bigchaindb/bigchaindb/issues?state=closed"
-const auth = ""
+const auth = "66adbc592dd7eaa7d1612e2d9d44d0c31a95e26b"
 
 type Issues []Issue
 
@@ -26,13 +25,6 @@ type Issue struct {
 type PullRequest struct {
 	Url string
 }
-
-type LinkHeader struct {
-	Url string
-	Rel string
-}
-
-type LinkHeaders []LinkHeader
 
 func getIssues(url string, auth string) (Issues, map[string]string, error) {
 	client := &http.Client{}
@@ -53,13 +45,9 @@ func getIssues(url string, auth string) (Issues, map[string]string, error) {
 		return nil, nil, err
 	}
 
-	content, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, nil, err
-	}
 
 	var issues Issues
-	err = json.Unmarshal(content, &issues)
+	err = json.NewDecoder(resp.Body).Decode(&issues)
 	if err != nil {
 		return nil, nil, err
 	}
