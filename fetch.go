@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/vrde/gitstats/utils"
+	"log"
 	"net/http"
 	"os"
 	"time"
 )
 
 const IssueUrl = "https://api.github.com/repos/%s/issues?state=closed"
+
+var Logger = log.New(os.Stderr, "", log.LstdFlags)
 
 type Issues []Issue
 
@@ -27,7 +30,10 @@ type PullRequest struct {
 }
 
 func fetchIssues(url string, issues *Issues) (error, string) {
-	resp, err := http.Get(url)
+	client := http.Client{}
+	req, err := http.NewRequest("GET", url, nil)
+	req.Header.Add("Authorization", "token "+os.Getenv("GITHUB_TOKEN"))
+	resp, err := client.Do(req)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
@@ -58,6 +64,7 @@ func FetchIssues(repository string) *Issues {
 			last Issues
 			err  error
 		)
+		Logger.Println("Fetching", url)
 		err, url = fetchIssues(url, &last)
 		if err != nil {
 			return &issues
