@@ -11,12 +11,11 @@ import (
 
 const IssueUrl = "https://api.github.com/repos/%s/issues?state=closed"
 
-var Logger = log.New(os.Stderr, "", log.LstdFlags)
-
-func fetchIssues(url string, issues *Issues) (error, string) {
+// Fetch issues from a specific URL.
+func fetchIssues(ctx *Context, url string, issues *Issues) (error, string) {
 	client := http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", "token "+os.Getenv("GITHUB_TOKEN"))
+	req.Header.Add("Authorization", "token "+ctx.GitHubToken)
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -40,7 +39,8 @@ func fetchIssues(url string, issues *Issues) (error, string) {
 	return utils.NextLinkHeader(resp.Header.Get("Link"))
 }
 
-func FetchIssues(repository string, ch chan<- *Issues) {
+// Fetch all the issues from a GitHub repository, and send them to a channel.
+func FetchIssues(ctx *Context, repository string, ch chan<- *Issues) {
 	url := fmt.Sprintf(IssueUrl, repository)
 
 	for {
@@ -48,8 +48,8 @@ func FetchIssues(repository string, ch chan<- *Issues) {
 			issues Issues
 			err    error
 		)
-		Logger.Println("Fetching", url)
-		err, url = fetchIssues(url, &issues)
+		log.Println("Fetching", url)
+		err, url = fetchIssues(ctx, url, &issues)
 		if err != nil {
 			close(ch)
 			return

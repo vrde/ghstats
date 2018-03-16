@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Extract the "next" link from the Headers of an HTTP request.
 func NextLinkHeader(linkHeader string) (error, string) {
 	for _, line := range strings.Split(linkHeader, ",") {
 		line := strings.TrimSpace(line)
