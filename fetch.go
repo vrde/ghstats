@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-const IssueUrl = "https://api.github.com/repos/%s/issues?state=closed"
+const IssueUrl = "https://api.github.com/repos/%s/issues"
 
 // Fetch issues from a specific URL.
 func fetchIssues(ctx *Context, url string, issues *Issues) (error, string) {
