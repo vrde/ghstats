@@ -1,4 +1,4 @@
-package gitstats
+package ghstats
 
 import (
 	"strconv"
@@ -31,9 +31,11 @@ func (i *Issues) GetHeaders() []string {
 
 func (i *Issues) ToSlice() [][]string {
 	acc := make([][]string, len(*i))
+
 	for j, issue := range *i {
 		acc[j] = issue.ToSlice()
 	}
+
 	return acc
 }
 
@@ -43,8 +45,10 @@ func (i *Issue) GetHeaders() []string {
 
 func (i *Issue) ToSlice() []string {
 	url := ""
+
 	if i.PullRequest != nil {
 		url = i.PullRequest.Url
 	}
+
 	return []string{strconv.Itoa(i.Number), url, i.CreatedAt.String(), i.UpdatedAt.String(), i.ClosedAt.String()}
 }

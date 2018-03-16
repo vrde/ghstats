@@ -2,15 +2,17 @@ package main
 
 import (
 	"encoding/csv"
-	"github.com/vrde/gitstats"
+	g "github.com/vrde/ghstats"
 	"os"
 )
 
 func main() {
 	w := csv.NewWriter(os.Stdout)
-	ch := make(chan *gitstats.Issues)
+	ch := make(chan *g.Issues)
 	h := true
-	go gitstats.FetchIssues(os.Args[1], ch)
+
+	go g.FetchIssues(os.Args[1], ch)
+
 	for issues := range ch {
 		if h {
 			w.Write(issues.GetHeaders())

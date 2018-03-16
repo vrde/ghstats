@@ -1,9 +1,9 @@
-package gitstats
+package ghstats
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/vrde/gitstats/utils"
+	"github.com/vrde/ghstats/utils"
 	"log"
 	"net/http"
 	"os"
@@ -33,6 +33,7 @@ func fetchIssues(url string, issues *Issues) (error, string) {
 
 	if err := json.NewDecoder(resp.Body).Decode(issues); err != nil {
 		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
+		fmt.Println(resp.Body)
 		os.Exit(1)
 	}
 
