@@ -12,11 +12,15 @@ For the proof of concept, downloading data from GitHub and creating a CSV file s
 $ go run cmd/ghstats.go org/repo > issues.csv
 ```
 
-# References
-To write this program I'm reading books and online resources. One day I might also get a [t-shirt](https://medium.com/@ashleymcnamara/gophercon-2018-b9a97387b954)
+# References and Tips
+To write this program I'm reading books and online resources. The idea is to write down everything I learn while coding. Hopefully this can help other people who are learning the language. One day I might also get a [t-shirt](https://medium.com/@ashleymcnamara/gophercon-2018-b9a97387b954)
+
+## Tips
+- [Documenting Go code](https://blog.golang.org/godoc-documenting-go-code) is extremely easy, just write a regular comment directly preceding a declaration.
+- If you have many files in a package it might be difficult to find the `.go` source file that contains the documentation for the package. In that case, the best practice is to create a `doc.go` file and write the documentation about that package there. See [fmt/doc.go](https://golang.org/src/fmt/doc.go) (thanks `Wessie@freenode/#go-nuts`).
 
 ## Books
-- [The Go Programming Language](https://www.gopl.io/)
+- [The Go Programming Language](https://www.gopl.io/).
 
 ## Online Resources
 - [Go Proverbs](https://go-proverbs.github.io/), words to live by when writing Go.
