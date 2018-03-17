@@ -2,11 +2,11 @@ package ghstats
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/vrde/ghstats/utils"
 	"log"
 	"net/http"
-	"os"
 )
 
 const IssueUrl = "https://api.github.com/repos/%s/issues"
@@ -19,21 +19,17 @@ func fetchIssues(ctx *Context, url string, issues *Issues) (error, string) {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
-		os.Exit(1)
+		return err, ""
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Fprintf(os.Stderr, "GET failed with status: %d (%v)\n", resp.StatusCode, err)
-		os.Exit(1)
+		return errors.New(fmt.Sprintf("GET <%s> failed with status: %d", url, resp.StatusCode)), ""
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(issues); err != nil {
-		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
-		fmt.Println(resp.Body)
-		os.Exit(1)
+		return err, ""
 	}
 
 	return utils.NextLinkHeader(resp.Header.Get("Link"))
@@ -50,7 +46,9 @@ func FetchIssues(ctx *Context, repository string, ch chan<- *Issues) {
 		)
 		log.Println("Fetching", url)
 		err, url = fetchIssues(ctx, url, &issues)
+
 		if err != nil {
+			log.Println(err)
 			close(ch)
 			return
 		}
