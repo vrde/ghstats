@@ -12,20 +12,20 @@ type Slicer interface {
 	ToSlice() []string
 }
 
-// An array of issues of type Issue
-type Issues []Issue
-
 // Headers for an issue. Used for serialization in conjunction with the
 // interface Slicer.
 var IssueHeaders = []string{"number", "pr_url", "created_at", "updated_at", "closed_at"}
 
+// An array of issues of type Issue
+type Issues []Issue
+
 // A GitHub Issue
 type Issue struct {
 	Number      int
-	PullRequest *PullRequest `json:"pull_request,omitempty"`
-	CreatedAt   time.Time    `json:"created_at"`
-	UpdatedAt   time.Time    `json:"updated_at"`
-	ClosedAt    time.Time    `json:"closed_at"`
+	PullRequest PullRequest `json:"pull_request,omitempty"`
+	CreatedAt   time.Time   `json:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at"`
+	ClosedAt    time.Time   `json:"closed_at"`
 }
 
 // A GitHub pull request
@@ -48,7 +48,7 @@ func (i *Issues) ToSlice() [][]string {
 func (i *Issue) ToSlice() []string {
 	url := ""
 
-	if i.PullRequest != nil {
+	if i.PullRequest == (PullRequest{}) {
 		url = i.PullRequest.Url
 	}
 

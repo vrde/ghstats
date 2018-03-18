@@ -12,7 +12,7 @@ import (
 const IssueUrl = "https://api.github.com/repos/%s/issues?state=closed"
 
 type IssuesResponse struct {
-	Issues *Issues
+	Issues Issues
 	Url    string
 	Error  error
 }
@@ -52,7 +52,7 @@ func FetchIssues(ctx *Context, repository string, ch chan<- *IssuesResponse) {
 		i.Url = url
 
 		log.Println("Fetching", url)
-		err, url = fetchIssues(ctx, url, i.Issues)
+		err, url = fetchIssues(ctx, url, &i.Issues)
 		i.Error = err
 
 		ch <- i
