@@ -7,8 +7,17 @@ import (
 	"time"
 )
 
+// Interface to serialize a struct to an array of strings.
+type Slicer interface {
+	ToSlice() []string
+}
+
 // An array of issues of type Issue
 type Issues []Issue
+
+// Headers for an issue. Used for serialization in conjunction with the
+// interface Slicer.
+var IssueHeaders = []string{"number", "pr_url", "created_at", "updated_at", "closed_at"}
 
 // A GitHub Issue
 type Issue struct {
@@ -24,20 +33,6 @@ type PullRequest struct {
 	Url string
 }
 
-// Thanks https://stackoverflow.com/a/33357286/597097 for the following idea.
-
-// An Interface providing basic functions that help serializing a type in a
-// CSV.
-type CSVAble interface {
-	GetHeaders() []string
-	ToSlice() []string
-}
-
-// Extract the headers of an array of issues.
-func (i *Issues) GetHeaders() []string {
-	return []string{"number", "pr_url", "created_at", "updated_at", "closed_at"}
-}
-
 // Serialize multiple issues to an array of strings.
 func (i *Issues) ToSlice() [][]string {
 	acc := make([][]string, len(*i))
@@ -47,11 +42,6 @@ func (i *Issues) ToSlice() [][]string {
 	}
 
 	return acc
-}
-
-// Extract the headers of an issue.
-func (i *Issue) GetHeaders() []string {
-	return []string{"number", "pr_url", "created_at", "updated_at", "closed_at"}
 }
 
 // Serialize an issue to an array of strings.

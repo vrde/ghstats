@@ -8,9 +8,6 @@ import (
 )
 
 func main() {
-	w := csv.NewWriter(os.Stdout)
-	ch := make(chan *g.Issues)
-	h := true
 	ctx := g.Context{}
 	if token, defined := os.LookupEnv("GITHUB_TOKEN"); defined {
 		ctx.GitHubToken = token
@@ -18,13 +15,16 @@ func main() {
 		log.Fatal("GITHUB_TOKEN env variable not found.")
 	}
 
+	ch := make(chan *g.IssuesResponse)
 	go g.FetchIssues(&ctx, os.Args[1], ch)
 
-	for issues := range ch {
-		if h {
-			w.Write(issues.GetHeaders())
-			h = false
+	w := csv.NewWriter(os.Stdout)
+	w.Write(g.IssueHeaders)
+	for i := range ch {
+		if i.Error != nil {
+			log.Printf("Error retrieving <%s>: %v", i.Url, i.Error)
+		} else {
+			w.WriteAll(i.Issues.ToSlice())
 		}
-		w.WriteAll(issues.ToSlice())
 	}
 }

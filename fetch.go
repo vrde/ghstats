@@ -9,7 +9,13 @@ import (
 	"net/http"
 )
 
-const IssueUrl = "https://api.github.com/repos/%s/issues"
+const IssueUrl = "https://api.github.com/repos/%s/issues?state=closed"
+
+type IssuesResponse struct {
+	Issues *Issues
+	Url    string
+	Error  error
+}
 
 // Fetch issues from a URL and return the next URL to follow for even moar
 // issues.
@@ -37,7 +43,7 @@ func fetchIssues(ctx *Context, url string, issues *Issues) (error, string) {
 }
 
 // Fetch all the issues from a GitHub repository, and send them to a channel.
-func FetchIssues(ctx *Context, repository string, ch chan<- *Issues) {
+func FetchIssues(ctx *Context, repository string, ch chan<- *IssuesResponse) {
 	var err error
 	url := fmt.Sprintf(IssueUrl, repository)
 
@@ -47,13 +53,13 @@ func FetchIssues(ctx *Context, repository string, ch chan<- *Issues) {
 		log.Println("Fetching", url)
 		err, url = fetchIssues(ctx, url, i)
 
+		ch <- &IssuesResponse{i, url, err}
+
 		if err != nil {
 			log.Println(err)
 			close(ch)
 			return
 		}
-
-		ch <- i
 
 		if url == "" {
 			close(ch)
