@@ -32,7 +32,7 @@ func fetchIssues(ctx *Context, url string, issues *Issues) (error, string) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return errors.New(fmt.Sprintf("GET <%s> failed with status: %d", url, resp.StatusCode)), ""
+		return errors.New(resp.Status), ""
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(issues); err != nil {
@@ -48,15 +48,16 @@ func FetchIssues(ctx *Context, repository string, ch chan<- *IssuesResponse) {
 	url := fmt.Sprintf(IssueUrl, repository)
 
 	for {
-		i := &Issues{}
+		i := &IssuesResponse{}
+		i.Url = url
 
 		log.Println("Fetching", url)
-		err, url = fetchIssues(ctx, url, i)
+		err, url = fetchIssues(ctx, url, i.Issues)
+		i.Error = err
 
-		ch <- &IssuesResponse{i, url, err}
+		ch <- i
 
 		if err != nil {
-			log.Println(err)
 			close(ch)
 			return
 		}
