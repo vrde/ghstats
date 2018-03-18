@@ -1,12 +1,12 @@
 package utils
 
 import (
-	"errors"
 	"strings"
 )
 
 // Extract the "next" link from the Headers of an HTTP request.
-func NextLinkHeader(linkHeader string) (error, string) {
+// If no "next" link is found, return the empty string.
+func NextLinkHeader(linkHeader string) string {
 	for _, line := range strings.Split(linkHeader, ",") {
 		line := strings.TrimSpace(line)
 
@@ -23,9 +23,8 @@ func NextLinkHeader(linkHeader string) (error, string) {
 		rel := strings.Trim(relTokens[1], `"`)
 
 		if rel == "next" {
-			return nil, link
+			return link
 		}
 	}
-
-	return errors.New(`cannot find "next" link in header`), ""
+	return ""
 }

@@ -11,7 +11,8 @@ import (
 
 const IssueUrl = "https://api.github.com/repos/%s/issues"
 
-// Fetch issues from a specific URL.
+// Fetch issues from a URL and return the next URL to follow for even moar
+// issues.
 func fetchIssues(ctx *Context, url string, issues *Issues) (error, string) {
 	client := http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
@@ -32,26 +33,32 @@ func fetchIssues(ctx *Context, url string, issues *Issues) (error, string) {
 		return err, ""
 	}
 
-	return utils.NextLinkHeader(resp.Header.Get("Link"))
+	return nil, utils.NextLinkHeader(resp.Header.Get("Link"))
 }
 
 // Fetch all the issues from a GitHub repository, and send them to a channel.
 func FetchIssues(ctx *Context, repository string, ch chan<- *Issues) {
+	var err error
 	url := fmt.Sprintf(IssueUrl, repository)
 
 	for {
-		var (
-			issues Issues
-			err    error
-		)
+		i := &Issues{}
+
 		log.Println("Fetching", url)
-		err, url = fetchIssues(ctx, url, &issues)
+		err, url = fetchIssues(ctx, url, i)
 
 		if err != nil {
 			log.Println(err)
 			close(ch)
 			return
 		}
-		ch <- &issues
+
+		ch <- i
+
+		if url == "" {
+			close(ch)
+			return
+		}
+
 	}
 }
