@@ -18,7 +18,7 @@ $ go run cmd/ghstats.go org/repo > issues.csv
 I'm using this repository to learn Go. Every time I reach a state where I'm happy with my progress, I'll manually add a new milestone by pointing to aspecific commit. I don't want to use tags because this repository will eventually be used only for software.
 
 This is the list of things I learned about the language:
-- [Learning the primitives of the language](https://github.com/vrde/ghstats/tree/618cdd5af27cc172974b1942e7ded2cbf0074fca). I gained some basic knowledge on how to use interfaces and types, handle errors, logging, testing (and continuous integration), concurrency and channels. I just want to get acquainted the standard library, no external dependencies for now. The program is now able to download issues of a specific repository from GitHub, and serialize them in CSV to `stdout` while printing logs to `stderr`.
+- [Learning the primitives of the language](https://github.com/vrde/ghstats/tree/af4b9b19e1e1a447f017529dd240e0529a77785d). I gained some basic knowledge on how to use interfaces and types, handle errors, logging, testing (and continuous integration), concurrency and channels. I just want to get acquainted the standard library, no external dependencies for now. The program is now able to download issues of a specific repository from GitHub, and serialize them in CSV to `stdout` while printing logs to `stderr`.
 
 # References and Tips
 To write this program I'm reading books and online resources. The idea is to write down everything I learn while coding. Hopefully this can help other people who are learning the language. One day I might also get a [t-shirt](https://medium.com/@ashleymcnamara/gophercon-2018-b9a97387b954)
