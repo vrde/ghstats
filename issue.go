@@ -3,7 +3,6 @@
 package ghstats
 
 import (
-	//"strconv"
 	"time"
 )
 

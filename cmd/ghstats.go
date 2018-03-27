@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	api := g.GetContext()
+	api := g.GetAPI()
 	backend := g.GetBackend()
 	err := g.UpdateAllFromOrg(api, backend, os.Args[1])
 	if err != nil {
