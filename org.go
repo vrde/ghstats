@@ -15,12 +15,16 @@ type Org struct {
 	AvatarUrl string `json:"avatar_url"`
 }
 
-func (o *Org) Headers() []string {
-	return []string{"id", "login", "html_url", "avatar_url"}
+func (o *Org) Table() Table {
+	return Table{"orgs", []Column{
+		Column{"id", "INTEGER PRIMARY KEY"},
+		Column{"login", "TEXT"},
+		Column{"html_url", "TEXT"},
+		Column{"avatar_url", "TEXT"}}}
 }
 
 func (o *Org) Values() []interface{} {
-	v := make([]interface{}, len(o.Headers()))
+	v := make([]interface{}, len(o.Table().Columns))
 	v[0] = o.Id
 	v[1] = o.Login
 	v[2] = o.HtmlUrl
@@ -28,12 +32,14 @@ func (o *Org) Values() []interface{} {
 	return v
 }
 
-func update(ch <-chan error, b *Backend, s Serializable) error {
+func update(ch <-chan error, b *Backend, s SQLable) error {
 	for err := range ch {
 		if err != nil {
 			return err
 		}
-		b.Store(s)
+		if err = b.Store(s); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -68,7 +74,9 @@ func UpdateAllFromOrg(c *API, b *Backend, name string) error {
 			if err != nil {
 				log.Print(err)
 			}
-			b.Store(repos)
+			if err = b.Store(repos); err != nil {
+				log.Print(err)
+			}
 
 			for _, repo := range repos.Repos {
 				wg.Add(1)
@@ -77,12 +85,13 @@ func UpdateAllFromOrg(c *API, b *Backend, name string) error {
 					issues := &Issues{}
 					issues.OrgId = org.Id
 					issues.RepoId = id
-					fmt.Printf(issuesUrl+"\n", org.Login, name)
 					err = update(c.FetchAll(fmt.Sprintf(issuesUrl, org.Login, name), &issues.Issues), b, issues)
 					if err != nil {
 						log.Print(err)
 					}
-					b.Store(issues)
+					if err = b.Store(issues); err != nil {
+						log.Print(err)
+					}
 				}(repo.Id, repo.Name)
 			}
 

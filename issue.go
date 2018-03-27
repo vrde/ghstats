@@ -29,19 +29,32 @@ type PullRequest struct {
 	Url string
 }
 
+func (i *Issues) Table() Table {
+	return Table{"issues", []Column{
+		Column{"id", "INTEGER PRIMARY KEY"},
+		Column{"org_id", "INTEGER"},
+		Column{"repo_id", "INTEGER"},
+		Column{"number", "INTEGER"},
+		Column{"pr_url", "TEXT"},
+		Column{"created_at", "DATETIME"},
+		Column{"updated_at", "DATETIME"},
+		Column{"closed_at", "DATETIME"}}}
+
+}
+
 func (i *Issues) Headers() []string {
-	return []string{"org_id", "repo_id", "issue_id", "number", "pr_url", "created_at", "updated_at", "closed_at"}
+	return []string{"id", "org_id", "repo_id", "number", "pr_url", "created_at", "updated_at", "closed_at"}
 }
 
 func (i *Issues) Values() []interface{} {
-	l := len(i.Headers())
+	l := len(i.Table().Columns)
 	v := make([]interface{}, l*len(i.Issues))
 
 	for j, x := range i.Issues {
 		o := j * l
-		v[o+0] = i.OrgId
-		v[o+1] = i.RepoId
-		v[o+2] = x.Id
+		v[o+0] = x.Id
+		v[o+1] = i.OrgId
+		v[o+2] = i.RepoId
 		v[o+3] = x.Number
 		v[o+4] = x.PullRequest.Url
 		v[o+5] = x.CreatedAt

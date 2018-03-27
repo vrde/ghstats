@@ -16,12 +16,23 @@ type Members struct {
 	Members []User
 }
 
+func (m *Members) Table() Table {
+	return Table{"members", []Column{
+		Column{"id", "INTEGER PRIMARY KEY"},
+		Column{"org_id", "INTEGER"},
+		Column{"login", "TEXT"},
+		Column{"name", "TEXT"},
+		Column{"bio", "TEXT"},
+		Column{"html_url", "TEXT"},
+		Column{"avatar_url", "TEXT"}}}
+}
+
 func (m *Members) Headers() []string {
-	return []string{"org_id", "user_id", "login", "name", "bio", "html_url", "avatar_url"}
+	return []string{"id", "org_id", "login", "name", "bio", "html_url", "avatar_url"}
 }
 
 func (m *Members) Values() []interface{} {
-	l := len(m.Headers())
+	l := len(m.Table().Columns)
 	v := make([]interface{}, l*len(m.Members))
 
 	for i, x := range m.Members {

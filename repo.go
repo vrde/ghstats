@@ -18,18 +18,28 @@ type Repo struct {
 	WatchersCount   int    `json:"watchers_count"`
 }
 
-func (r *Repos) Headers() []string {
-	return []string{"org_id", "repo_id", "name", "full_name", "description", "html_url", "forks_count", "stargazers_count", "whatchers_count"}
+func (r *Repos) Table() Table {
+	return Table{"repos", []Column{
+		Column{"id", "INTEGER PRIMARY KEY"},
+		Column{"org_id", "INTEGER"},
+		Column{"name", "TEXT"},
+		Column{"full_name", "TEXT"},
+		Column{"description", "TEXT"},
+		Column{"html_url", "TEXT"},
+		Column{"forks_count", "INTEGER"},
+		Column{"stargazers_count", "INTEGER"},
+		Column{"watchers_count", "INTEGER"},
+	}}
 }
 
 func (r *Repos) Values() []interface{} {
-	l := len(r.Headers())
+	l := len(r.Table().Columns)
 	v := make([]interface{}, l*len(r.Repos))
 
 	for i, x := range r.Repos {
 		o := i * l
-		v[o+0] = r.OrgId
-		v[o+1] = x.Id
+		v[o+0] = x.Id
+		v[o+1] = r.OrgId
 		v[o+2] = x.Name
 		v[o+3] = x.FullName
 		v[o+4] = x.Description
