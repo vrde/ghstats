@@ -4,34 +4,34 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/vrde/ghstats/utils"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 // The context to use when doing HTTP requests.
 //
 // It contains the GitHub authentication token and the API root.
-type Context struct {
+type API struct {
 	GitHubToken   string
 	GitHubRootAPI string
 }
 
-func GetContext() *Context {
-	ctx := Context{}
-	ctx.GitHubRootAPI = "https://api.github.com"
+func GetAPI() *API {
+	api := API{}
+	api.GitHubRootAPI = "https://api.github.com"
 
 	if token, defined := os.LookupEnv("GITHUB_TOKEN"); defined {
-		ctx.GitHubToken = token
+		api.GitHubToken = token
 	} else {
 		log.Fatal("GITHUB_TOKEN env variable not found.")
 	}
 
-	return &ctx
+	return &api
 }
 
-func (c *Context) fetch(url string, v interface{}) (string, error) {
+func (c *API) fetch(url string, v interface{}) (string, error) {
 	client := http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", "token "+c.GitHubToken)
@@ -55,15 +55,15 @@ func (c *Context) fetch(url string, v interface{}) (string, error) {
 
 	log.Printf("got %s", url)
 
-	return utils.NextLinkHeader(resp.Header.Get("Link")), nil
+	return nextLinkHeader(resp.Header.Get("Link")), nil
 }
 
-func (c *Context) Fetch(url string, v interface{}) (string, error) {
+func (c *API) Fetch(url string, v interface{}) (string, error) {
 	url = c.GitHubRootAPI + url
 	return c.fetch(url, v)
 }
 
-func (c *Context) FetchAll(url string, v interface{}) <-chan error {
+func (c *API) FetchAll(url string, v interface{}) <-chan error {
 	url = c.GitHubRootAPI + url
 	ch := make(chan error)
 	go func() {
@@ -80,4 +80,29 @@ func (c *Context) FetchAll(url string, v interface{}) <-chan error {
 		}
 	}()
 	return ch
+}
+
+// Extract the "next" link from the Headers of an HTTP request.
+// If no "next" link is found, return the empty string.
+func nextLinkHeader(linkHeader string) string {
+	for _, line := range strings.Split(linkHeader, ",") {
+		line := strings.TrimSpace(line)
+
+		linkTokens := strings.Split(line, ";")
+		if len(linkTokens) != 2 {
+			continue
+		}
+		link := strings.Trim(linkTokens[0], "<>")
+
+		relTokens := strings.Split(linkTokens[1], "=")
+		if len(relTokens) != 2 {
+			continue
+		}
+		rel := strings.Trim(relTokens[1], `"`)
+
+		if rel == "next" {
+			return link
+		}
+	}
+	return ""
 }

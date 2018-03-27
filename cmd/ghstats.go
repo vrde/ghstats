@@ -7,9 +7,9 @@ import (
 )
 
 func main() {
-	ctx := g.GetContext()
+	api := g.GetContext()
 	backend := g.GetBackend()
-	err := g.UpdateAllFromOrg(ctx, backend, os.Args[1])
+	err := g.UpdateAllFromOrg(api, backend, os.Args[1])
 	if err != nil {
 		log.Fatal(err)
 	}

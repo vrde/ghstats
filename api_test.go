@@ -1,4 +1,4 @@
-package utils
+package ghstats
 
 import (
 	"testing"
@@ -24,10 +24,10 @@ func TestParseLinkHeader(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		next := NextLinkHeader(test.header)
+		next := nextLinkHeader(test.header)
 
 		if next != test.next {
-			t.Errorf("NextLinkHeader(%q)\nGot:  %v\nWant: %v", test.header, next, test.next)
+			t.Errorf("nextLinkHeader(%q)\nGot:  %v\nWant: %v", test.header, next, test.next)
 		}
 	}
 }

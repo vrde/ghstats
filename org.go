@@ -38,7 +38,7 @@ func update(ch <-chan error, b *Backend, s Serializable) error {
 	return nil
 }
 
-func UpdateAllFromOrg(c *Context, b *Backend, name string) error {
+func UpdateAllFromOrg(c *API, b *Backend, name string) error {
 	wg := sync.WaitGroup{}
 
 	org := &Org{}
