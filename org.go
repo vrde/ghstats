@@ -37,7 +37,7 @@ func update(ch <-chan error, b *Backend, s SQLable) error {
 		if err != nil {
 			return err
 		}
-		if err = b.Store(s); err != nil {
+		if err = b.Insert(s); err != nil {
 			return err
 		}
 	}
@@ -74,7 +74,7 @@ func UpdateAllFromOrg(c *API, b *Backend, name string) error {
 			if err != nil {
 				log.Print(err)
 			}
-			if err = b.Store(repos); err != nil {
+			if err = b.Insert(repos); err != nil {
 				log.Print(err)
 			}
 
@@ -89,7 +89,7 @@ func UpdateAllFromOrg(c *API, b *Backend, name string) error {
 					if err != nil {
 						log.Print(err)
 					}
-					if err = b.Store(issues); err != nil {
+					if err = b.Insert(issues); err != nil {
 						log.Print(err)
 					}
 				}(repo.Id, repo.Name)

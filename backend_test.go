@@ -68,7 +68,7 @@ func TestInsertValue(t *testing.T) {
 	//table := d.Table()
 
 	b.CreateTables(&d)
-	err = b.Store(&d)
+	err = b.Insert(&d)
 	assert.Nil(err)
 
 	var rows *sql.Rows

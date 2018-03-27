@@ -45,7 +45,7 @@ func tableToNamesAndTypes(t Table) string {
 func GetBackend(db *sql.DB) *Backend {
 	return &Backend{db}
 }
-func (b *Backend) Store(s SQLable) error {
+func (b *Backend) Insert(s SQLable) error {
 	values := s.Values()
 	columns := len(s.Table().Columns)
 	items := len(values) / columns
