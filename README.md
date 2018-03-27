@@ -35,6 +35,7 @@ To write this program I'm reading books and online resources. The idea is to wri
 - [Pointers vs. values in parameters and return values](https://stackoverflow.com/questions/23542989/pointers-vs-values-in-parameters-and-return-values), helped me understand the different patterns regarding that topic.
 - [Standard Package Layout – Ben Johnson – Medium](https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1), some neat ideas on how to organize your code, I really like the section "Root package is for domain types".
 - [Go Project Layout – golang-learn – Medium](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2), where should I put the command line interface?
+- [The Go scheduler - Morsing's blog](https://morsmachine.dk/go-scheduler), is Go blocking or async?
 
 ## Read it/Watch it later
 - [Go Proverbs - Rob Pike - Gopherfest - November 18, 2015 - YouTube](https://www.youtube.com/watch?v=PAAkCSZUG1c&t=7m36s)

@@ -3,24 +3,21 @@
 package ghstats
 
 import (
-	"strconv"
+	//"strconv"
 	"time"
 )
 
-// Interface to serialize a struct to an array of strings.
-type Slicer interface {
-	ToSlice() []string
+const issuesUrl = "/repos/%s/%s/issues"
+
+type Issues struct {
+	OrgId  int
+	RepoId int
+	Issues []Issue
 }
-
-// Headers for an issue. Used for serialization in conjunction with the
-// interface Slicer.
-var IssueHeaders = []string{"number", "pr_url", "created_at", "updated_at", "closed_at"}
-
-// An array of issues of type Issue
-type Issues []Issue
 
 // A GitHub Issue
 type Issue struct {
+	Id          int
 	Number      int
 	PullRequest PullRequest `json:"pull_request,omitempty"`
 	CreatedAt   time.Time   `json:"created_at"`
@@ -33,24 +30,24 @@ type PullRequest struct {
 	Url string
 }
 
-// Serialize multiple issues to an array of strings.
-func (i *Issues) ToSlice() [][]string {
-	acc := make([][]string, len(*i))
-
-	for j, issue := range *i {
-		acc[j] = issue.ToSlice()
-	}
-
-	return acc
+func (i *Issues) Headers() []string {
+	return []string{"org_id", "repo_id", "issue_id", "number", "pr_url", "created_at", "updated_at", "closed_at"}
 }
 
-// Serialize an issue to an array of strings.
-func (i *Issue) ToSlice() []string {
-	url := ""
+func (i *Issues) Values() []interface{} {
+	l := len(i.Headers())
+	v := make([]interface{}, l*len(i.Issues))
 
-	if i.PullRequest == (PullRequest{}) {
-		url = i.PullRequest.Url
+	for j, x := range i.Issues {
+		o := j * l
+		v[o+0] = i.OrgId
+		v[o+1] = i.RepoId
+		v[o+2] = x.Id
+		v[o+3] = x.Number
+		v[o+4] = x.PullRequest.Url
+		v[o+5] = x.CreatedAt
+		v[o+6] = x.UpdatedAt
+		v[o+7] = x.ClosedAt
 	}
-
-	return []string{strconv.Itoa(i.Number), url, i.CreatedAt.String(), i.UpdatedAt.String(), i.ClosedAt.String()}
+	return v
 }
