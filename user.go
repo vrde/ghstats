@@ -27,18 +27,14 @@ func (m *Members) Table() Table {
 		Column{"avatar_url", "TEXT"}}}
 }
 
-func (m *Members) Headers() []string {
-	return []string{"id", "org_id", "login", "name", "bio", "html_url", "avatar_url"}
-}
-
 func (m *Members) Values() []interface{} {
 	l := len(m.Table().Columns)
 	v := make([]interface{}, l*len(m.Members))
 
 	for i, x := range m.Members {
 		o := i * l
-		v[o+0] = m.OrgId
-		v[o+1] = x.Id
+		v[o+0] = x.Id
+		v[o+1] = m.OrgId
 		v[o+2] = x.Login
 		v[o+3] = x.Name
 		v[o+4] = x.Bio

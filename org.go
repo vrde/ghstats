@@ -60,7 +60,7 @@ func UpdateAllFromOrg(c *API, b *Backend, name string) error {
 		members.OrgId = org.Id
 		err = update(c.FetchAll(fmt.Sprintf(membersUrl, name), &members.Members), b, members)
 		if err != nil {
-			log.Print(err)
+			log.Printf("error updating org members: %v", err)
 		}
 	}()
 
@@ -72,10 +72,10 @@ func UpdateAllFromOrg(c *API, b *Backend, name string) error {
 
 		for err := range c.FetchAll(fmt.Sprintf(reposUrl, name), &repos.Repos) {
 			if err != nil {
-				log.Print(err)
+				log.Printf("error fetching repo <%s>: %v", name, err)
 			}
 			if err = b.Insert(repos); err != nil {
-				log.Print(err)
+				log.Printf("error updating repo <%s>: %v", name, err)
 			}
 
 			for _, repo := range repos.Repos {
@@ -87,10 +87,11 @@ func UpdateAllFromOrg(c *API, b *Backend, name string) error {
 					issues.RepoId = id
 					err = update(c.FetchAll(fmt.Sprintf(issuesUrl, org.Login, name), &issues.Issues), b, issues)
 					if err != nil {
-						log.Print(err)
+						log.Printf("error fetching issues for <%s>: %v", name, err)
+						return
 					}
 					if err = b.Insert(issues); err != nil {
-						log.Print(err)
+						log.Printf("error updating issues for <%s>: %v", name, err)
 					}
 				}(repo.Id, repo.Name)
 			}

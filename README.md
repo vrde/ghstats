@@ -19,6 +19,7 @@ I'm using this repository to learn Go. Every time I reach a state where I'm happ
 
 This is the list of things I learned about the language:
 - [Learning the primitives of the language](https://github.com/vrde/ghstats/tree/af4b9b19e1e1a447f017529dd240e0529a77785d). I gained some basic knowledge on how to use interfaces and types, handle errors, logging, testing (and continuous integration), concurrency and channels. I just want to get acquainted the standard library, no external dependencies for now. The program is now able to download issues of a specific repository from GitHub, and serialize them in CSV to `stdout` while printing logs to `stderr`.
+- [Memory reuse is bad](https://play.golang.org/p/RNuUvCqJUzB) and can lead to weird errors to debug. I was trying to reuse memory because I read it was more efficient. To be clear: I wasn't hitting any performance bottleneck, I just wanted to play more with memory and structs.
 
 # References and Tips
 To write this program I'm reading books and online resources. The idea is to write down everything I learn while coding. Hopefully this can help other people who are learning the language. One day I might also get a [t-shirt](https://medium.com/@ashleymcnamara/gophercon-2018-b9a97387b954)

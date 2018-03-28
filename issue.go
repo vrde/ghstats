@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const issuesUrl = "/repos/%s/%s/issues"
+const issuesUrl = "/repos/%s/%s/issues?state=all"
 
 type Issues struct {
 	OrgId  int
@@ -18,7 +18,11 @@ type Issues struct {
 type Issue struct {
 	Id          int
 	Number      int
-	PullRequest PullRequest `json:"pull_request,omitempty"`
+	State       string
+	Title       string
+	Body        string
+	User        User
+	PullRequest PullRequest `json:"pull_request"`
 	CreatedAt   time.Time   `json:"created_at"`
 	UpdatedAt   time.Time   `json:"updated_at"`
 	ClosedAt    time.Time   `json:"closed_at"`
@@ -35,15 +39,15 @@ func (i *Issues) Table() Table {
 		Column{"org_id", "INTEGER"},
 		Column{"repo_id", "INTEGER"},
 		Column{"number", "INTEGER"},
+		Column{"state", "TEXT"},
+		Column{"title", "TEXT"},
+		Column{"body", "TEXT"},
+		Column{"user_id", "INTEGER"},
 		Column{"pr_url", "TEXT"},
 		Column{"created_at", "DATETIME"},
 		Column{"updated_at", "DATETIME"},
 		Column{"closed_at", "DATETIME"}}}
 
-}
-
-func (i *Issues) Headers() []string {
-	return []string{"id", "org_id", "repo_id", "number", "pr_url", "created_at", "updated_at", "closed_at"}
 }
 
 func (i *Issues) Values() []interface{} {
@@ -56,10 +60,14 @@ func (i *Issues) Values() []interface{} {
 		v[o+1] = i.OrgId
 		v[o+2] = i.RepoId
 		v[o+3] = x.Number
-		v[o+4] = x.PullRequest.Url
-		v[o+5] = x.CreatedAt
-		v[o+6] = x.UpdatedAt
-		v[o+7] = x.ClosedAt
+		v[o+4] = x.State
+		v[o+5] = x.Title
+		v[o+6] = x.Body
+		v[o+7] = x.User.Id
+		v[o+8] = x.PullRequest.Url
+		v[o+9] = x.CreatedAt
+		v[o+10] = x.UpdatedAt
+		v[o+11] = x.ClosedAt
 	}
 	return v
 }
