@@ -1,0 +1,5 @@
+select members.login, count(*) from issues
+inner join repos on issues.repo_id = repos.id
+inner join members on issues.user_id = members.id
+where repos.name = "bigchaindb"
+group by members.login

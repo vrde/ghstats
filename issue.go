@@ -3,15 +3,17 @@
 package ghstats
 
 import (
+	"fmt"
 	"time"
 )
 
 const issuesUrl = "/repos/%s/%s/issues?state=all"
 
 type Issues struct {
-	OrgId  int
-	RepoId int
-	Issues []Issue
+	OrgId    int
+	RepoId   int
+	RepoName string
+	Issues   []Issue
 }
 
 // A GitHub Issue
@@ -70,4 +72,13 @@ func (i *Issues) Values() []interface{} {
 		v[o+11] = x.ClosedAt
 	}
 	return v
+}
+
+func (i *Issues) Url() string {
+	return fmt.Sprintf(issuesUrl, i.RepoName)
+}
+
+func (i *Issues) Reset() interface{} {
+	i.Issues = []Issue{}
+	return &i.Issues
 }

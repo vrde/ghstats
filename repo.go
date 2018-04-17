@@ -1,10 +1,15 @@
 package ghstats
 
+import (
+	"fmt"
+)
+
 const reposUrl = "/orgs/%s/repos"
 
 type Repos struct {
-	OrgId int
-	Repos []Repo
+	OrgId    int
+	OrgLogin string
+	Repos    []Repo
 }
 
 type Repo struct {
@@ -49,4 +54,13 @@ func (r *Repos) Values() []interface{} {
 		v[o+8] = x.WatchersCount
 	}
 	return v
+}
+
+func (r *Repos) Url() string {
+	return fmt.Sprintf(reposUrl, r.OrgLogin)
+}
+
+func (r *Repos) Reset() interface{} {
+	r.Repos = []Repo{}
+	return &r.Repos
 }

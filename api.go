@@ -10,6 +10,11 @@ import (
 	"strings"
 )
 
+type Fetcher interface {
+	Url() string
+	Reset() interface{}
+}
+
 // The context to use when doing HTTP requests.
 //
 // It contains the GitHub authentication token and the API root.
@@ -58,18 +63,17 @@ func (c *API) fetch(url string, v interface{}) (string, error) {
 	return nextLinkHeader(resp.Header.Get("Link")), nil
 }
 
-func (c *API) Fetch(url string, v interface{}) (string, error) {
-	url = c.GitHubRootAPI + url
-	return c.fetch(url, v)
+func (c *API) Fetch(f Fetcher) (string, error) {
+	return c.fetch(c.GitHubRootAPI+f.Url(), f.Reset())
 }
 
-func (c *API) FetchAll(url string, v interface{}) <-chan error {
-	url = c.GitHubRootAPI + url
+func (c *API) FetchAll(f Fetcher) <-chan error {
+	url := c.GitHubRootAPI + f.Url()
 	ch := make(chan error)
 	go func() {
 		defer close(ch)
 		for url != "" {
-			next, err := c.fetch(url, v)
+			next, err := c.fetch(url, f.Reset())
 			url = next
 
 			if err != nil {

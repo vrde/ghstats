@@ -17,7 +17,7 @@ type Column struct {
 	Type string
 }
 
-type SQLable interface {
+type Storer interface {
 	Table() Table
 	Values() []interface{}
 }
@@ -45,7 +45,7 @@ func tableToNamesAndTypes(t Table) string {
 func GetBackend(db *sql.DB) *Backend {
 	return &Backend{db}
 }
-func (b *Backend) Insert(s SQLable) error {
+func (b *Backend) Insert(s Storer) error {
 	values := s.Values()
 	columns := len(s.Table().Columns)
 	items := len(values) / columns
@@ -60,7 +60,7 @@ func (b *Backend) Insert(s SQLable) error {
 	return err
 }
 
-func (b *Backend) CreateTables(args ...SQLable) error {
+func (b *Backend) CreateTables(args ...Storer) error {
 	for _, s := range args {
 		stmt := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s);", s.Table().Name, tableToNamesAndTypes(s.Table()))
 		if _, err := b.db.Exec(stmt); err != nil {

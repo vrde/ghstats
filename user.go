@@ -1,5 +1,9 @@
 package ghstats
 
+import (
+	"fmt"
+)
+
 const membersUrl = "/orgs/%s/members"
 
 type User struct {
@@ -12,8 +16,9 @@ type User struct {
 }
 
 type Members struct {
-	OrgId   int
-	Members []User
+	OrgId    int
+	OrgLogin string
+	Members  []User
 }
 
 func (m *Members) Table() Table {
@@ -42,4 +47,13 @@ func (m *Members) Values() []interface{} {
 		v[o+6] = x.AvatarUrl
 	}
 	return v
+}
+
+func (m *Members) Url() string {
+	return fmt.Sprintf(membersUrl, m.OrgLogin)
+}
+
+func (m *Members) Reset() interface{} {
+	m.Members = &[]User{}
+	return m.Members
 }

@@ -32,7 +32,15 @@ func (o *Org) Values() []interface{} {
 	return v
 }
 
-func update(ch <-chan error, b *Backend, s SQLable) error {
+func (o *Org) Url() string {
+	return fmt.Sprintf(orgUrl, o.Login)
+}
+
+func (o *Org) Reset() interface{} {
+	return o
+}
+
+func update(ch <-chan error, b *Backend, s Storer) error {
 	for err := range ch {
 		if err != nil {
 			return err
@@ -44,11 +52,11 @@ func update(ch <-chan error, b *Backend, s SQLable) error {
 	return nil
 }
 
-func UpdateAllFromOrg(c *API, b *Backend, name string) error {
+func UpdateAllFromOrg(a *API, b *Backend, name string) error {
 	wg := sync.WaitGroup{}
 
-	org := &Org{}
-	err := update(c.FetchAll(fmt.Sprintf(orgUrl, name), org), b, org)
+	org := &Org{Login: name}
+	err := FetchAndUpdate(a, b, org)
 	if err != nil {
 		return err
 	}
@@ -58,7 +66,7 @@ func UpdateAllFromOrg(c *API, b *Backend, name string) error {
 		defer wg.Done()
 		members := &Members{}
 		members.OrgId = org.Id
-		err = update(c.FetchAll(fmt.Sprintf(membersUrl, name), &members.Members), b, members)
+		err = FetchAndUpdate(a, b, members)
 		if err != nil {
 			log.Printf("error updating org members: %v", err)
 		}
@@ -67,10 +75,25 @@ func UpdateAllFromOrg(c *API, b *Backend, name string) error {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		repos := &Repos{}
-		repos.OrgId = org.Id
+		r := &Repos{OrgId: org.Id, OrgLogin: org.Login}
 
-		for err := range c.FetchAll(fmt.Sprintf(reposUrl, name), &repos.Repos) {
+		for err := range a.FetchAll(r) {
+			if err != nil {
+				log.Printf("error updating org members: %v", err)
+			}
+			b.Insert(r)
+			for _, repo := range r.Repos {
+				wg.Add(1)
+				go func(orgId int, repoId int) {
+					defer wg.Done()
+					i := &Issues{OrgId: orgId, RepoId: repo.Id, RepoName: repo.RepoName}
+					FetchAndUpdate(a, b, i)
+				}(repo.Id, repo.Name)
+			}
+			u.Reset()
+		}
+
+		for err := range a.FetchAll(fmt.Sprintf(reposUrl, name), &repos.Repos) {
 			if err != nil {
 				log.Printf("error fetching repo <%s>: %v", name, err)
 			}
