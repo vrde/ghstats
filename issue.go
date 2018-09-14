@@ -3,17 +3,14 @@
 package ghstats
 
 import (
-	"fmt"
 	"time"
 )
 
-const issuesUrl = "/repos/%s/%s/issues?state=all"
-
 type Issues struct {
-	OrgId    int
-	RepoId   int
-	RepoName string
-	Issues   []Issue
+	OrgId  int
+	RepoId int
+	Name   string
+	buffer IssuesBuffer
 }
 
 // A GitHub Issue
@@ -24,11 +21,13 @@ type Issue struct {
 	Title       string
 	Body        string
 	User        User
-	PullRequest PullRequest `json:"pull_request"`
-	CreatedAt   time.Time   `json:"created_at"`
-	UpdatedAt   time.Time   `json:"updated_at"`
-	ClosedAt    time.Time   `json:"closed_at"`
+	PullRequest *PullRequest `json:"pull_request"`
+	CreatedAt   time.Time    `json:"created_at"`
+	UpdatedAt   time.Time    `json:"updated_at"`
+	ClosedAt    time.Time    `json:"closed_at"`
 }
+
+type IssuesBuffer []Issue
 
 // A GitHub pull request
 type PullRequest struct {
@@ -53,10 +52,11 @@ func (i *Issues) Table() Table {
 }
 
 func (i *Issues) Values() []interface{} {
+	items := i.buffer
 	l := len(i.Table().Columns)
-	v := make([]interface{}, l*len(i.Issues))
+	v := make([]interface{}, l*len(items))
 
-	for j, x := range i.Issues {
+	for j, x := range items {
 		o := j * l
 		v[o+0] = x.Id
 		v[o+1] = i.OrgId
@@ -74,11 +74,15 @@ func (i *Issues) Values() []interface{} {
 	return v
 }
 
-func (i *Issues) Url() string {
-	return fmt.Sprintf(issuesUrl, i.RepoName)
+func (i *Issues) NewBuffer() Iterable {
+	i.buffer = IssuesBuffer{}
+	return &i.buffer
 }
 
-func (i *Issues) Reset() interface{} {
-	i.Issues = []Issue{}
-	return &i.Issues
+func (i *IssuesBuffer) Items() []interface{} {
+	items := make([]interface{}, len(*i))
+	for j, v := range *i {
+		items[j] = v
+	}
+	return items
 }

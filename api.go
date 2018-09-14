@@ -36,7 +36,7 @@ func GetAPI() *API {
 	return &api
 }
 
-func (c *API) fetch(url string, v interface{}) (string, error) {
+func (c *API) Fetch(url string, v interface{}) (string, error) {
 	client := http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", "token "+c.GitHubToken)
@@ -50,6 +50,7 @@ func (c *API) fetch(url string, v interface{}) (string, error) {
 
 	defer resp.Body.Close()
 
+	log.Printf("GET [%d]: %s, %p", resp.StatusCode, url, v)
 	if resp.StatusCode != http.StatusOK {
 		return "", errors.New(fmt.Sprintf("error retrieving <%s>: %v", url, resp.Status))
 	}
@@ -58,32 +59,7 @@ func (c *API) fetch(url string, v interface{}) (string, error) {
 		return "", err
 	}
 
-	log.Printf("got %s", url)
-
 	return nextLinkHeader(resp.Header.Get("Link")), nil
-}
-
-func (c *API) Fetch(f Fetcher) (string, error) {
-	return c.fetch(c.GitHubRootAPI+f.Url(), f.Reset())
-}
-
-func (c *API) FetchAll(f Fetcher) <-chan error {
-	url := c.GitHubRootAPI + f.Url()
-	ch := make(chan error)
-	go func() {
-		defer close(ch)
-		for url != "" {
-			next, err := c.fetch(url, f.Reset())
-			url = next
-
-			if err != nil {
-				ch <- err
-			} else {
-				ch <- nil
-			}
-		}
-	}()
-	return ch
 }
 
 // Extract the "next" link from the Headers of an HTTP request.

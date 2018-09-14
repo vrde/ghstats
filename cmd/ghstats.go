@@ -22,7 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = g.UpdateAllFromOrg(api, backend, os.Args[1])
+	g.FetchOrg(api, os.Args[1])
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,15 +1,7 @@
 package ghstats
 
-import (
-	"fmt"
-)
-
-const reposUrl = "/orgs/%s/repos"
-
 type Repos struct {
-	OrgId    int
-	OrgLogin string
-	Repos    []Repo
+	buffer ReposBuffer
 }
 
 type Repo struct {
@@ -22,6 +14,8 @@ type Repo struct {
 	StargazersCount int    `json:"stargazers_count"`
 	WatchersCount   int    `json:"watchers_count"`
 }
+
+type ReposBuffer []Repo
 
 func (r *Repos) Table() Table {
 	return Table{"repos", []Column{
@@ -39,12 +33,12 @@ func (r *Repos) Table() Table {
 
 func (r *Repos) Values() []interface{} {
 	l := len(r.Table().Columns)
-	v := make([]interface{}, l*len(r.Repos))
+	v := make([]interface{}, l*len(r.buffer))
 
-	for i, x := range r.Repos {
+	for i, x := range r.buffer {
 		o := i * l
 		v[o+0] = x.Id
-		v[o+1] = r.OrgId
+		v[o+1] = 1
 		v[o+2] = x.Name
 		v[o+3] = x.FullName
 		v[o+4] = x.Description
@@ -56,11 +50,15 @@ func (r *Repos) Values() []interface{} {
 	return v
 }
 
-func (r *Repos) Url() string {
-	return fmt.Sprintf(reposUrl, r.OrgLogin)
+func (r *Repos) NewBuffer() Iterable {
+	r.buffer = ReposBuffer{}
+	return &r.buffer
 }
 
-func (r *Repos) Reset() interface{} {
-	r.Repos = []Repo{}
-	return &r.Repos
+func (r *ReposBuffer) Items() []interface{} {
+	items := make([]interface{}, len(*r))
+	for i, v := range *r {
+		items[i] = v
+	}
+	return items
 }

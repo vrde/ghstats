@@ -1,11 +1,5 @@
 package ghstats
 
-import (
-	"fmt"
-)
-
-const membersUrl = "/orgs/%s/members"
-
 type User struct {
 	Id        int
 	Login     string
@@ -15,10 +9,12 @@ type User struct {
 	AvatarUrl string `json:"avatar_url"`
 }
 
+type UsersBuffer []User
+
 type Members struct {
 	OrgId    int
 	OrgLogin string
-	Members  []User
+	buffer   UsersBuffer
 }
 
 func (m *Members) Table() Table {
@@ -34,9 +30,9 @@ func (m *Members) Table() Table {
 
 func (m *Members) Values() []interface{} {
 	l := len(m.Table().Columns)
-	v := make([]interface{}, l*len(m.Members))
+	v := make([]interface{}, l*len(m.buffer))
 
-	for i, x := range m.Members {
+	for i, x := range m.buffer {
 		o := i * l
 		v[o+0] = x.Id
 		v[o+1] = m.OrgId
@@ -49,11 +45,15 @@ func (m *Members) Values() []interface{} {
 	return v
 }
 
-func (m *Members) Url() string {
-	return fmt.Sprintf(membersUrl, m.OrgLogin)
+func (m *Members) NewBuffer() Iterable {
+	m.buffer = UsersBuffer{}
+	return &m.buffer
 }
 
-func (m *Members) Reset() interface{} {
-	m.Members = &[]User{}
-	return m.Members
+func (m *UsersBuffer) Items() []interface{} {
+	items := make([]interface{}, len(*m))
+	for i, v := range *m {
+		items[i] = v
+	}
+	return items
 }

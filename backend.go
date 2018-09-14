@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+type Iterable interface {
+	Items() []interface{}
+}
+
 type Table struct {
 	Name    string
 	Columns []Column
@@ -20,6 +24,7 @@ type Column struct {
 type Storer interface {
 	Table() Table
 	Values() []interface{}
+	NewBuffer() Iterable
 }
 
 type Backend struct {
